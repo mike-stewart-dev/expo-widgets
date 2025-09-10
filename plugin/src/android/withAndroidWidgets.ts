@@ -1,15 +1,16 @@
 import { ConfigPlugin } from '@expo/config-plugins';
 import { WithExpoAndroidWidgetsProps } from '..';
 import { withSourceFiles } from './withSourceFiles';
-import { withModule } from './withModule';
 import { withGsonGradle, withWidgetAppBuildGradle } from './withAppBuildGradle';
 import { withWidgetProjectBuildGradle } from './withProjectBuildGradle';
 import { withWidgetManifest } from './withWidgetManifest';
+import { withModule } from './withModule';
 
 const DEFAULT_OPTIONS: WithExpoAndroidWidgetsProps = {
   src: 'widgets/android',
   widgets: [],
   distPlaceholder: '',
+  includeDefaultModule: false,
 };
 
 function getDefaultedOptions(options: WithExpoAndroidWidgetsProps) {
@@ -24,7 +25,6 @@ export const withAndroidWidgets: ConfigPlugin<WithExpoAndroidWidgetsProps> = (
   userOptions
 ) => {
   const options = getDefaultedOptions(userOptions);
-  config = withModule(config, options);
 
   config = withWidgetManifest(config, options);
 
@@ -35,6 +35,10 @@ export const withAndroidWidgets: ConfigPlugin<WithExpoAndroidWidgetsProps> = (
   config = withWidgetAppBuildGradle(config);
   config = withGsonGradle(config);
   config = withSourceFiles(config, options);
+
+  if (options.includeDefaultModule) {
+    config = withModule(config, options);
+  }
 
   return config;
 };

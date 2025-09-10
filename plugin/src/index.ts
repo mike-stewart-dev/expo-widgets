@@ -30,6 +30,12 @@ export type WithExpoAndroidWidgetsProps = {
      * in kotlin files with expo.android.package in your app.(ts/json). 
      */
     distPlaceholder: string;
+    /**
+     * If you are upgrading from a previous version, you can set this to true
+     * to restore the old behavior of copying the native module to your project.
+     * @default false
+     */
+    includeDefaultModule?: boolean;
 }
 
 export type IOSEntitlements = PlistObject;

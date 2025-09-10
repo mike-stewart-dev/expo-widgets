@@ -11,7 +11,19 @@ import { AndroidWidgetProjectSettings, WithExpoAndroidWidgetsProps } from "..";
         newConfig.modResults,
       )
       const widgetReceivers = buildWidgetsReceivers(options)
-      mainApplication.receiver = widgetReceivers
+
+      if (!mainApplication.receiver) {
+        mainApplication.receiver = []
+      }
+
+      const existingReceivers = new Set(mainApplication.receiver.map(r => r.$['android:name']))
+
+      for (const receiver of widgetReceivers) {
+        if (!existingReceivers.has(receiver.$['android:name'])) {
+            mainApplication.receiver.push(receiver)
+            existingReceivers.add(receiver.$['android:name'])
+        }
+      }
   
       return newConfig
     })
