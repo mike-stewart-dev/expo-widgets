@@ -14,7 +14,7 @@ class ExpoWidgetsModule : Module() {
   override fun definition() = ModuleDefinition {
     Name("ExpoWidgets")
 
-    Function("setWidgetData") { json: String, packageName: String -> 
+    Function("setWidgetData") { json: String, packageName: String ->
       getPreferences(packageName).edit().putString("widgetdata", json).commit()
 
       val intent = Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
@@ -27,13 +27,27 @@ class ExpoWidgetsModule : Module() {
       for (provider in widgetProviders) {
           if (provider.activityInfo.packageName == packageName) {
               val providerComponent = ComponentName(
-                  provider.activityInfo.packageName, 
+                  provider.activityInfo.packageName,
                   provider.activityInfo.name
               )
               val widgetIds = widgetManager.getAppWidgetIds(providerComponent)
               intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, widgetIds)
               context.sendBroadcast(intent)
           }
+      }
+    }
+
+    Function("updateWidgetData") { widgetId: String, json: String, packageName: String ->
+      val widgetIdInt = widgetId.toInt()
+      getPreferences(packageName).edit().putString("widgetdata_$widgetIdInt", json).commit()
+
+      val appWidgetManager = AppWidgetManager.getInstance(context)
+      val providerInfo = appWidgetManager.getAppWidgetInfo(widgetIdInt)
+      if (providerInfo != null) {
+          val intent = Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
+          intent.component = providerInfo.provider
+          intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(widgetIdInt))
+          context.sendBroadcast(intent)
       }
     }
   }

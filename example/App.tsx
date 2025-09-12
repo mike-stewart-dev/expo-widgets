@@ -1,5 +1,5 @@
 import { Button, Platform, StyleSheet, Text, View } from 'react-native';
-import * as ExpoWidgetsModule from '@bittingz/expo-widgets';
+import { setWidgetData, updateWidgetData } from '@bittingz/expo-widgets';
 import Constants from 'expo-constants';
 
 /*
@@ -18,15 +18,26 @@ import Constants from 'expo-constants';
   > npm run android
 */
 export default function App() {
-  function sendWidgetData() {
+  function sendGenericWidgetData() {
     const androidPackage = Constants.expoConfig?.android?.package;
 
     if (Platform.OS === 'ios') {
-      const json = JSON.stringify({ message: 'Hello from app!' });
-      ExpoWidgetsModule.setWidgetData(json);
+      setWidgetData({ message: 'Hello from app!' });
     } else if (androidPackage) {
-      const json = JSON.stringify({ message: 'Hello from app!' });
-      ExpoWidgetsModule.setWidgetData(json, androidPackage);
+        setWidgetData({ message: 'Hello from app!' }, androidPackage);
+    }
+  }
+
+  function sendSpecificWidgetData() {
+    const androidPackage = Constants.expoConfig?.android?.package;
+
+    if (Platform.OS === 'ios') {
+        updateWidgetData("MyWidgets", { message: 'Hello from updated widget!' });
+    } else if (androidPackage) {
+        // NOTE: You'll need to get the widgetId from your native code.
+        // This is just an example with a hardcoded widgetId.
+        const widgetId = "1";
+        updateWidgetData(widgetId, { message: 'Hello from updated widget!' }, androidPackage);
     }
   }
 
@@ -34,8 +45,12 @@ export default function App() {
     <View style={styles.container}>
       <Text>Example App!</Text>
       <Button
-        title='Send Widget Data!' 
-        onPress={sendWidgetData} 
+        title='Send Generic Widget Data!'
+        onPress={sendGenericWidgetData}
+      />
+      <Button
+        title='Send Specific Widget Data!'
+        onPress={sendSpecificWidgetData}
       />
     </View>
   );

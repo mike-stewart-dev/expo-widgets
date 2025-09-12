@@ -14,8 +14,8 @@ public class ExpoWidgetsModule: Module {
     public func definition() -> ModuleDefinition {
         Name("ExpoWidgets")
         
-        Function("setWidgetData") { (data: String) -> Void in   
-            let logger = Logger(logHandlers: [MyLogHandler()])     
+        Function("setWidgetData") { (data: String) -> Void in
+            let logger = Logger(logHandlers: [MyLogHandler()])
             // here we are using UserDefaults to send data to the widget
             // you MUST use a suite name of the format group.{your project bundle id}.expowidgets
             let widgetSuite = UserDefaults(suiteName: "group.expo.modules.widgets.example.expowidgets")
@@ -27,6 +27,18 @@ public class ExpoWidgetsModule: Module {
             // messages sent to the widget do not count towards its timeline limitations
             if #available(iOS 14.0, *) {
                WidgetCenter.shared.reloadAllTimelines()
+            }
+        }
+
+        Function("updateWidgetData") { (kind: String, data: String) -> Void in
+            let logger = Logger(logHandlers: [MyLogHandler()])
+            let widgetSuite = UserDefaults(suiteName: "group.expo.modules.widgets.example.expowidgets")
+            widgetSuite?.set(data, forKey: "MyData")
+            logger.log(message: "Encoded data saved to suite group.expo.modules.widgets.example.expowidgets, key MyData")
+            logger.log(message: data)
+
+            if #available(iOS 14.0, *) {
+               WidgetCenter.shared.reloadTimelines(ofKind: kind)
             }
         }
     }
