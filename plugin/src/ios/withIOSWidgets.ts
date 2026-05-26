@@ -6,6 +6,7 @@ import { withPodfile } from "./withPodfile"
 import { withModule } from "./withModule"
 import { withEntitlements } from "./xcode/withEntitlements"
 import { withWidgetInfoPlist } from "./xcode/withWidgetInfoPlist"
+import { injectNativeFonts } from "./withNativeFonts"
 
 const defaultOptions = (): WithExpoIOSWidgetsProps => {
     return {
@@ -44,6 +45,7 @@ export const withIOSWidgets: ConfigPlugin<WithExpoIOSWidgetsProps> = (config, op
         moduleDependencies: options.moduleDependencies || moduleDependencies,
         mode: options.mode || mode,
         widgetExtPlugins: options.widgetExtPlugins || widgetExtPlugins,
+        fonts: options.fonts,
         xcode: {
             widgetBundleIdentifier: options.xcode?.widgetBundleIdentifier || xcode?.widgetBundleIdentifier,
             appGroupId: options.xcode?.appGroupId || xcode?.appGroupId,
@@ -60,6 +62,7 @@ export const withIOSWidgets: ConfigPlugin<WithExpoIOSWidgetsProps> = (config, op
         withWidgetXCode(config, defaultedOptions)
         withEntitlements(config, options)
         withWidgetInfoPlist(config, options)
+        injectNativeFonts(config, defaultedOptions)
         withPodfile(config, defaultedOptions)
 
         return config;

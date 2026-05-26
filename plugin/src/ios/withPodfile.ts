@@ -32,35 +32,45 @@ target '${targetName}' do
 end
 `;
 
-  const withAppExtFix = mergeContents({
-    tag: "app_ext_fix",
-    src: podFileContent,
-    newSrc: `
-        config.build_settings['APPLICATION_EXTENSION_API_ONLY'] = resource_bundle_target.name == 'Sentry' ? 'YES' : 'No'
-        `,
-    anchor: /resource_bundle_target.build_configurations.each do \|config\|/,
-    offset: 1,
-    comment: "#",
-  })
+  let updatedContent = podFileContent;
 
-  const withAppExtFixPt2 = mergeContents({
-    tag: 'fix2',
-    src: withAppExtFix.contents,
-    newSrc: ` installer.pods_project.targets.each do |target|
+  const hasResourceBundleTarget = /resource_bundle_target.build_configurations.each do \|config\|/.test(podFileContent);
+  if (hasResourceBundleTarget) {
+    const withAppExtFix = mergeContents({
+      tag: "app_ext_fix",
+      src: updatedContent,
+      newSrc: `
+        config.build_settings['APPLICATION_EXTENSION_API_ONLY'] = 'No'
+        `,
+      anchor: /resource_bundle_target.build_configurations.each do \|config\|/,
+      offset: 1,
+      comment: "#",
+    })
+    updatedContent = withAppExtFix.contents;
+  }
+
+  const hasPostInstall = /post_install do \|installer\|/.test(updatedContent);
+  if (hasPostInstall) {
+    const withAppExtFixPt2 = mergeContents({
+      tag: 'fix2',
+      src: updatedContent,
+      newSrc: ` installer.pods_project.targets.each do |target|
         target.build_configurations.each do |config|
           config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
-          config.build_settings['APPLICATION_EXTENSION_API_ONLY'] = target.name == 'Sentry' ? 'YES' : 'No' 
+          config.build_settings['APPLICATION_EXTENSION_API_ONLY'] = 'No'
         end
       end`,
-    anchor: /post_install do \|installer\|/,
-    offset: 1,
-    comment: "#",
-  })
+      anchor: /post_install do \|installer\|/,
+      offset: 1,
+      comment: "#",
+    })
+    updatedContent = withAppExtFixPt2.contents;
+  }
 
   Logging.logger.debug('Updating podfile')
 
   fs.writeFileSync(podFilePath, [
-    withAppExtFixPt2.contents,
+    updatedContent,
     podInstaller
   ].join('\n'));
 

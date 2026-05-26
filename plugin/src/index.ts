@@ -34,9 +34,31 @@ export type WithExpoAndroidWidgetsProps = {
 
 export type IOSEntitlements = PlistObject;
 
+export type NativeFontConfig = {
+    /**
+     * The relative file path from the srcFolder to the font file.
+     */
+    filePath: string;
+    /**
+     * Optional display name for the font. If not provided, the file basename is used.
+     */
+    name?: string;
+}
+
+export type NativeFontsConfig = {
+    /**
+     * The folder your font files are within, relative to the project root.
+     */
+    srcFolder: string;
+    /**
+     * The fonts to install in the widget extension.
+     */
+    fonts: NativeFontConfig[];
+}
+
 export type WithExpoIOSWidgetsProps = {
     /**
-     * The directory of your widget native code. 
+     * The directory of your widget native code.
      */
     src: string;
     /**
@@ -95,6 +117,10 @@ export type WithExpoIOSWidgetsProps = {
      * Plugins to run after the widget extension is created
      */
     widgetExtPlugins: ConfigPlugin<any>[];
+    /**
+     * Native fonts to add to the widget extension target.
+     */
+    fonts?: NativeFontsConfig;
 }
 
 export type WithExpoWidgetsProps = {

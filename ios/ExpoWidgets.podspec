@@ -10,8 +10,8 @@ Pod::Spec.new do |s|
   s.license        = package['license']
   s.author         = package['author']
   s.homepage       = package['homepage']
-  s.platform       = :ios, '13.0'
-  s.swift_version  = '5.0'
+  s.platform       = :ios, '15.1'
+  s.swift_version  = '5.9'
   s.source         = { git: 'https://github.com/gitn00b1337/expo-widgets' }
   s.static_framework = true
 

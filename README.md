@@ -4,16 +4,18 @@ An expo module that allows you to make native widgets in iOS and android.
 
 ## Installation
 
-Use v1 packages for expo 49, or v2 for expo 51+. 
+Use v1 packages for expo 49, v2 for expo 51-52, v3 for expo 53-54, or v4 for expo 55+.
 
-```npx expo install @bittingz/expo-widgets```
+```
+npx expo install @bittingz/expo-widgets
+```
 
 ## Setup
 
 See the example project for more clarity. You can omit the android or ios folders and setup if you only wish to support one platform.
 
 1. Create a folder where you want to store your widget files.
-2. In your plugins array (app.config.{js/ts} add:
+2. In your plugins array (app.config.{js/ts}) add:
 
 ```
 [
@@ -48,9 +50,37 @@ See the example project for more clarity. You can omit the android or ios folder
 4. Your android folder should mimic android studio setup, so it has two subfolder paths: /android/main/java/package_name and /android/res/.... The package_name is currently being worked on for adjusting the name. Inside you place your widget.kt files. The res folder should contain your assets, the same as in android studio.
 5. If you have any swift files you need to use within Module.swift, simply add them to the moduleDependencies array in your app.config. This is particularly useful for data models between the module and widget.
 6. To share data between your app and widgets you can use a variety of methods, but the easiest way is to use UserPreferences. This plugin automatically handles it for you, so all you have to do is make sure to use a suiteName with the correct format. See the example project.
-7. If you want to use custom fonts in your iOS widget, use my expo-native-fonts package; see the example project for usage. Android widgets work well with resource folders and don't require additional dependencies.
-8. For android, set resourceName to your file name in /res/xml/***_info.xml
-9. For android apps which require multiple distributions with different package names you can use distPlaceholder which will replace all instances of the provided placeholder in widget source files with your app.config.(json/ts/js). So if your source files include "package com.company.app" and "import com.company.app" and you have two distributions (com.company.app for prod and dev.company.app for dev) then setting distPlaceholder to com.company.app will replace all package and import references to the correct distribution each build. You can omit this field if it's not relevant to you. iOS requires no configuration for multiple distribution apps.
+7. For android, set resourceName to your file name in /res/xml/***_info.xml
+8. For android apps which require multiple distributions with different package names you can use distPlaceholder which will replace all instances of the provided placeholder in widget source files with your app.config.(json/ts/js). So if your source files include "package com.company.app" and "import com.company.app" and you have two distributions (com.company.app for prod and dev.company.app for dev) then setting distPlaceholder to com.company.app will replace all package and import references to the correct distribution each build. You can omit this field if it's not relevant to you. iOS requires no configuration for multiple distribution apps.
+
+## Custom Fonts for iOS Widgets
+
+You can add custom fonts (e.g. .ttf files) directly to your widget extension without a separate package. Add a `fonts` config to your iOS options:
+
+```
+[
+    "@bittingz/expo-widgets",
+    {
+        ios: {
+            src: "./widgets/ios",
+            devTeamId: "YOUR_TEAM_ID",
+            fonts: {
+                srcFolder: "./fonts",
+                fonts: [
+                    { filePath: "Montserrat/Montserrat-Bold.ttf" },
+                    { filePath: "Montserrat/Montserrat-Regular.ttf" }
+                ]
+            }
+        }
+    }
+]
+```
+
+- `srcFolder` is the path from your project root to the folder containing your font files.
+- Each entry in `fonts` specifies a `filePath` relative to `srcFolder`.
+- Optionally include a `name` field if you want a custom display name for the font.
+
+The plugin will copy the font files into the widget extension, add them to the Xcode project, and register them in the widget's Info.plist (`UIAppFonts`).
 
 ## Overriding xcode options
 
@@ -88,10 +118,6 @@ npm run android
 ## Troubleshooting Android
 
 If you use R in your widget kotlin file to get layouts, you may get an unresolved reference error for R. In this case, simply add "package your.appconfig.packageid.R", delete your android folder and rebuild.
-
-## Need Custom Fonts?
-
-Give my [other expo module a try](https://github.com/gitn00b1337/expo-native-fonts). You'll need to put the fonts config before the widgets config.
 
 ## Need Development?
 

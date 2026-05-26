@@ -14,7 +14,7 @@ type PlistKeyValue = {
     tag: string
 }
 
-const getKeyValues = (shortVersion: string, bundleVersion: string): PlistKeyValue[] => [
+const getKeyValues = (): PlistKeyValue[] => [
     { key: 'CFBundleDevelopmentRegion', value: '$(DEVELOPMENT_LANGUAGE)', tag: 'string', },
     { key: 'CFBundleDisplayName', value: 'ExpoWidgets', tag: 'string', },
     { key: 'CFBundleExecutable', value: '$(EXECUTABLE_NAME)', tag: 'string', },
@@ -22,8 +22,8 @@ const getKeyValues = (shortVersion: string, bundleVersion: string): PlistKeyValu
     { key: 'CFBundleInfoDictionaryVersion', value: '6.0', tag: 'string', },
     { key: 'CFBundleName', value: '$(PRODUCT_NAME)', tag: 'string', },
     { key: 'CFBundlePackageType', value: '$(PRODUCT_BUNDLE_PACKAGE_TYPE)', tag: 'string', },
-    { key: 'CFBundleShortVersionString', value: shortVersion, tag: 'string', },
-    { key: 'CFBundleVersion', value: bundleVersion, tag: 'string', },
+    { key: 'CFBundleShortVersionString', value: '$(MARKETING_VERSION)', tag: 'string', },
+    { key: 'CFBundleVersion', value: '$(CURRENT_PROJECT_VERSION)', tag: 'string', },
     { key: 'NSExtension', value: `<key>NSExtensionPointIdentifier</key>
     <string>com.apple.widgetkit-extension</string>`,  tag: 'dict', },
 ]
@@ -33,14 +33,14 @@ const keyValueAsXml = ({ tag, key, value }: PlistKeyValue) => {
     <${tag}>${value}</${tag}>`
 }
 
-const getKeyValuesAsXml = (bundleVersion: string, shortVersion: string) => {
-    return getKeyValues(bundleVersion, shortVersion).reduce((xml, kv) => {
+const getKeyValuesAsXml = () => {
+    return getKeyValues().reduce((xml, kv) => {
         return `${xml}
             ${keyValueAsXml(kv)}`
     }, '')
 }
 
-const getPlistContents = (bundleVersion: string, shortVersion: string) => {
+const getPlistContents = () => {
     return `<?xml version="1.0" encoding="UTF-8"?>
     <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
     <plist version="1.0">
@@ -51,12 +51,8 @@ const getPlistContents = (bundleVersion: string, shortVersion: string) => {
 export const withWidgetInfoPlist = (config: ExportedConfigWithProps<unknown>, options: WithExpoIOSWidgetsProps) => {
     const targetName = getTargetName(config, options)
     const plistFilePath = path.join(config.modRequest.projectRoot, 'ios', targetName, 'Info.plist')
-    
-    // see docs.expo.dev/build-reference/app-versions
-    const bundleVersion = config.ios?.buildNumber ?? '1'
-    const shortVersion = config?.version ?? '1.0'
-    const plistContents = getPlistContents(bundleVersion, shortVersion)
-    
+    const plistContents = getPlistContents()
+
     if (!fsExtra.existsSync(plistFilePath)) {
         fsExtra.writeFileSync(plistFilePath, plistContents)
     }
@@ -65,7 +61,7 @@ export const withWidgetInfoPlist = (config: ExportedConfigWithProps<unknown>, op
     let newContents = ''
 
     if (contents.indexOf('<dict>') > -1) {
-        const keyValues = getKeyValues(bundleVersion, shortVersion)
+        const keyValues = getKeyValues()
 
         let contentsToInsert = ''
 
@@ -79,7 +75,7 @@ export const withWidgetInfoPlist = (config: ExportedConfigWithProps<unknown>, op
         }
 
         const insertIndex = contents.indexOf('<dict>') + 6
-        newContents = contents.substring(0, insertIndex) 
+        newContents = contents.substring(0, insertIndex)
             + contentsToInsert
             + contents.substring(insertIndex)
 
@@ -93,7 +89,7 @@ export const withWidgetInfoPlist = (config: ExportedConfigWithProps<unknown>, op
 
         newContents = `${contents.substring(0, insertIndex)}
         <dict>
-            ${ getKeyValuesAsXml(bundleVersion, shortVersion)}
+            ${ getKeyValuesAsXml()}
         </dict>
         </plist>`
     }

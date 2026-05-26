@@ -24,26 +24,17 @@ export const withModule = (
         const moduleFile = path.join(widgetFolderPath, 'Module.swift')
 
         if (!fs.existsSync(moduleFile)) {
-            // the module file is optional. if they don't provide then it's a simple widget with no
-            // need for comms between app and the widget
-            // to avoid writes from previous runs, extract contents from the template and overwrite any previous changes
-            const templatePath = path.join(__dirname, 'module.template.swift')
-            Logging.logger.debug(`No Module.swift provided. Using template ${templatePath}`)
+            Logging.logger.debug(`No Module.swift provided. Using template.`)
 
             const contents = getTemplate()
             fsExtra.outputFileSync(expoModulePath, contents)
         }
         else {
             const contents = fs.readFileSync(moduleFile)
-
-            if (!fs.existsSync(expoModulePath)) {
-                throw new Error(`No iOS expo module found within expo-widgets! Contact us.`)
-            }
-
             fsExtra.outputFileSync(expoModulePath, contents)
         }
 
-        const writtenContent = fsExtra.readFileSync(moduleFile, 'utf-8')
+        const writtenContent = fsExtra.readFileSync(expoModulePath, 'utf-8')
         Logging.logger.debug(`Module.swift contents::`)
         Logging.logger.debug(writtenContent)
 
